@@ -1,8 +1,9 @@
 from vidgear.gears import NetGear
 import cv2
+
+client_ip_address = "192.168.0.162"
 options = {'flag': 0, 'copy': False, 'track': False}
-client = NetGear(address='192.168.0.243', protocol='tcp',  pattern=1, receive_mode=True, logging=True,
-                 **options)
+client = NetGear(address=client_ip_address, port='5454', receive_mode=True)
 while True:
     frame = client.recv()
     if frame is None:
