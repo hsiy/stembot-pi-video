@@ -2,7 +2,7 @@ import picamera
 
 
 class CameraDefaults:
-    CAMERA_RESOLUTION_DEFAULT = 720
+    CAMERA_RESOLUTION_DEFAULT = "720p"
     DEFAULT_IP = "localhost"
     CAMERA_PORT_DEFAULT = 5454
     CAMERA_FRAME_RATE_DEFAULT = 30
@@ -23,7 +23,7 @@ def get_valid_resolutions():
     Static method that defines list of valid resolutions
     :return: list of valid resolutions
     """
-    return [720, 480, 360]
+    return ["720p", "480p", "360p", "240p"]
 
 
 def get_valid_frame_rate():
@@ -187,14 +187,10 @@ class CustomCamera:
 
     def get_resolution(self):
         """
-        Returns the tuple pair that represents the resolution of the string that is stored
-        :return: tuple (int, int) representation of the resolution
+        Returns the resolution of that is stored
+        :return: the resolution value
         """
-        if self.__camera_dictionary["resolution"] == 360:
-            return 640, 360
-        if self.__camera_dictionary["resolution"] == 480:
-            return 854, 480
-        return 1280, 720
+        return self.__camera_dictionary["resolution"]
 
     def set_frame_rate(self, framerate):
         """

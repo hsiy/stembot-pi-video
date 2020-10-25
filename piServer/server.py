@@ -1,68 +1,53 @@
 import argparse
+import customcamera
 import time
 import zmq
 import picamera
-import struct
 import io
 
-low = (640, 480)
-high = (1080, 720)
-
-class customActions(argparse.Action):
-    def __init__(self, option_strings, dest, nargs=None, **kwargs):
-        if nargs is not None:
-            raise ValueError("nargs not allowed")
-        super(customActions, self).__init__(option_strings, dest, **kwargs)
-
-    def __call__(self, parser, namespace, values, option_string=None):
-        if values == "low":
-            values = low
-        elif values == "high":
-            values = high
-        setattr(namespace, self.dest, values)       
-
 option_parse = argparse.ArgumentParser(description="Set up of Raspberry Pi Camera streaming module")
-option_parse.add_argument("--resolution", type=str, default=low, help="Set the resolution of the camera", choices=["high", "low"], action=customActions)
-option_parse.add_argument("--ip", type=str, default="localhost", help="Set the IP address")
-option_parse.add_argument("--port", type=int, default="5454", help="Set the IP address")
-option_parse.add_argument("--framerate", type=int, default="30", help="Set the framerate")
-option_parse.add_argument("--debug", type=bool, default=False, help="Shows debugging information", choices=[True, False])
+option_parse.add_argument("--resolution", type=int, default=customcamera.CameraDefaults.CAMERA_RESOLUTION_DEFAULT, help="Set the resolution of the camera", choices=customcamera.get_valid_resolutions())
+option_parse.add_argument("--ip", type=str, default=customcamera.CameraDefaults.CAMERA_IP_DEFAULT, help="Set the IP address")
+option_parse.add_argument("--port", type=int, default=customcamera.CameraDefaults.CAMERA_PORT_DEFAULT, help="Set the port number")
+option_parse.add_argument("--framerate", type=int, default=customcamera.CameraDefaults.CAMERA_FRAMERATE_DEFAULT, help="Set the frame rate", choices=customcamera.get_valid_frame_rate())
+option_parse.add_argument("--hflip", type=bool, default=customcamera.CameraDefaults.CAMERA_H_FLIP_DEFAULT, help="Set the h-flip value", choices=customcamera.get_valid_hflip())
+option_parse.add_argument("--vflip", type=bool, default=customcamera.CameraDefaults.CAMERA_V_FLIP_DEFAULT, help="Set the v-flip value", choices=customcamera.get_valid_vflip())
+option_parse.add_argument("--rotation", type=int, default=customcamera.CameraDefaults.CAMERA_ROTATION_DEFAULT, help="Set the rotation value", choices=customcamera.get_valid_rotation())
+option_parse.add_argument("--iso", type=int, default=customcamera.CameraDefaults.CAMERA_ISO_DEFAULT, help="Set the ISO value", choices=customcamera.get_valid_iso())
+option_parse.add_argument("--framerate", type=int, default=customcamera.CameraDefaults.CAMERA_FRAMERATE_DEFAULT, help="Set the frame rate", choices=customcamera.get_valid_frame_rate())
+option_parse.add_argument("--preview", type=bool, default=customcamera.CameraDefaults.CAMERA_PREVIEW_DEFAULT, help="Shows preview on pi display", choices=customcamera.get_valid_preview())
+option_parse.add_argument("--debug", type=bool, default=customcamera.CameraDefaults.OTHER_DEBUG, help="Shows debugging information", choices=customcamera.get_valid_debug())
 
-DEBUG = option_parse.parse_args().debug
-
-if DEBUG:
-    print(option_parse.parse_args())
-    print("Resolution: ", option_parse.parse_args().resolution)
-    print("IP Address: ", option_parse.parse_args().ip)
-    print("Port: ", option_parse.parse_args().port)
-    print("Port: ", option_parse.parse_args().framerate)
-
-(height, width) = option_parse.parse_args().resolution
+camera = customcamera.CustomCamera(resolution=option_parse.parse_args().resolution, framerate=option_parse.parse_args().framerate,
+                                   hflip=option_parse.parse_args().hflip, vflip=option_parse.parse_args().vflip,
+                                   rotation=option_parse.parse_args().rotation, iso=option_parse.parse_args().iso,
+                                   brightness=option_parse.parse_args().brightness, contrast=option_parse.parse_args().contrast,
+                                   saturation=option_parse.parse_args().saturation, stabilization=option_parse.parse_args().stabilization,
+                                   preview=option_parse.parse_args().preview, debug=option_parse.parse_args().debug,
+                                   ip=option_parse.parse_args().ip, port=option_parse.parse_args().port)
 
 context = zmq.Context()
 socket = context.socket(zmq.PUB)
 socket.set_hwm(1)
-socket.bind("tcp://*:" + str(option_parse.parse_args().port))
+socket.bind("tcp://*:" + str(camera.get_camera_port()))
 
-camera = picamera.PiCamera()
-camera.resolution = option_parse.parse_args().resolution
-camera.framerate = option_parse.parse_args().framerate
-# possibly remove preview?
-camera.start_preview()
 stream = io.BytesIO()
+if option_parse.parse_args().preview:
+    camera.get_camera().start_preview()
 
 time.sleep(.1)
 
 count_frame = 0
 try:
-    for frame in camera.capture_continuous(stream, format="jpeg", use_video_port=True):
+    for frame in camera.get_camera().capture_continuous(stream, format="jpeg", use_video_port=True):
         message = str(stream.getvalue())
         socket.send(stream.getvalue())
-        if DEBUG:
+        if camera.get_debug:
             print("Sent!\n", count_frame)
         count_frame = (count_frame + 1) % 100
         stream.seek(0)
 finally:
-    camera.close()
+    camera.get_camera().close()
+    camera.get_camera().stop_preview()
     stream.close()
     socket.close()
