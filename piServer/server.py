@@ -59,8 +59,8 @@ try:
         message = str(stream.getvalue())
         socket.send(stream.getvalue())
         if DEBUG:
-            print("Sent!\n", framenum)
-        framenum = (framenum + 1) % 100
+            print("Sent!\n", count_frame)
+        count_frame = (count_frame + 1) % 100
         stream.seek(0)
 finally:
     camera.close()

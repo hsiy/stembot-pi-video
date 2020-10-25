@@ -1,0 +1,1 @@
+server.py should be run on the raspberry pi then start unity scene

@@ -58,5 +58,6 @@ pip install -U opencv-python
 pip install picamera
 pip install uvloop
 pip install vidgear[asyncio]
+pip install zmq
 
 cd ~
