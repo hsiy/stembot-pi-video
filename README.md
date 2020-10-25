@@ -8,11 +8,13 @@ The current functionality offered by this repository is a kind of "proof of conc
 
   1. rasberryPiSetup: This folder contains a shell script to be run on the Raspberry Pi. This downloads the different libraries needed for the streaming.
   
-  2. piServer: This folder contains a Python program that sends camera input to a specified IP address.
+  2. piServer: This folder contains a Python program that sends camera input to the Unity application.
   
-  3. localClient: This folder contains another Python program that receives the camera input at the designated IP address and displays it using opencv.
+  3. localClient (outdated from Milestone 1 proof of concept): This folder contains another Python program that receives the camera input at the designated IP address and displays it using opencv.
+  
+  4. unityIntegration: This folder contains the Unity portion of the application integration.
   
   
 Instuctions for use:
 
-It is the first step is to ensure that the Raspberry Pi is set up correctly and has the camera enabled. After that the user should run the shell script on the pi to download the necessary libraries. Next, configure the running enviornment on the computer, installing dependancies as nessessary. Then modify the ip address of both the client and server side scripts to the IP address of the client. Finally run the scripts and the video should stream to the computer!
+It is the first step is to ensure that the Raspberry Pi is set up correctly and has the camera enabled. After that the user should run the shell script on the pi to download the necessary libraries. Next, configure the running enviornment on the computer by installing unity hub and importing the project. You then must install the version of Unity it prompts. Then modify the ip address within the Unity application (this is the IP address of the raspberry PI). Finally run the script on the raspberry PI and then start the scene within Unity. You should now see video being streamed to the Unity Application!
