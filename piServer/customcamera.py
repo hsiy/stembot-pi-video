@@ -3,7 +3,6 @@ import picamera
 
 class CameraDefaults:
     CAMERA_RESOLUTION_DEFAULT = "720p"
-    DEFAULT_IP = "localhost"
     CAMERA_PORT_DEFAULT = 5454
     CAMERA_FRAME_RATE_DEFAULT = 30
     CAMERA_H_FLIP_DEFAULT = False
@@ -15,7 +14,6 @@ class CameraDefaults:
     CAMERA_SATURATION_DEFAULT = 0
     CAMERA_STABILIZATION_DEFAULT = False
     CAMERA_PREVIEW_DEFAULT = False
-    OTHER_DEBUG = False
 
 
 def get_valid_resolutions():
@@ -31,7 +29,7 @@ def get_valid_frame_rate():
     Static method that defines list of valid frame rates
     :return: list of valid frame rates
     """
-    return [range(5, 91, 5)]
+    return [*range(5, 91, 5)]
 
 
 def get_valid_hflip():
@@ -74,7 +72,7 @@ def get_valid_brightness():
     :return: list of valid brightness values
     """
     # check if need to change to range 0-1600 from docs
-    return [range(0, 101, 1)]
+    return [*range(0, 101, 1)]
 
 
 def get_valid_contrast():
@@ -83,7 +81,7 @@ def get_valid_contrast():
     :return: list of valid contrast values
     """
     # check if need to change to range 0-1600 from docs
-    return [range(-100, 101, 1)]
+    return [*range(-100, 101, 1)]
 
 
 def get_valid_saturation():
@@ -92,7 +90,7 @@ def get_valid_saturation():
     :return: list of valid saturation values
     """
     # check if need to change to range 0-1600 from docs
-    return [range(-100, 101, 1)]
+    return [*range(-100, 101, 1)]
 
 
 def get_valid_stabilization():
@@ -113,21 +111,11 @@ def get_valid_preview():
     return [True, False]
 
 
-def get_valid_debug():
-    """
-    Static method that defines list of valid debug values
-    :return: list of valid debug values
-    """
-    # check if need to change to range 0-1600 from docs
-    return [True, False]
-
-
 class CustomCamera:
     __camera_dictionary = dict()
     __camera = picamera.PiCamera()
 
-    def __init__(self, resolution, framerate, hflip, vflip, rotation, iso, brightness, contrast, saturation, stabilization, preview, debug, ip=CameraDefaults.DEFAULT_IP, port=CameraDefaults.CAMERA_PORT_DEFAULT):
-        self.debug = debug
+    def __init__(self, resolution, framerate, hflip, vflip, rotation, iso, brightness, contrast, saturation, stabilization, preview, port=CameraDefaults.CAMERA_PORT_DEFAULT):
         self.initialize_dictionary()
         self.set_resolution(resolution)
         self.set_frame_rate(framerate)
@@ -140,7 +128,6 @@ class CustomCamera:
         self.set_saturation(saturation)
         self.set_stabilization(stabilization)
         self.set_preview(preview)
-        self.__camera_dictionary["ip"] = ip
         self.__camera_dictionary["camera_port"] = port
 
     def initialize_dictionary(self):
@@ -155,7 +142,6 @@ class CustomCamera:
         self.__camera_dictionary["saturation"] = CameraDefaults.CAMERA_SATURATION_DEFAULT
         self.__camera_dictionary["stabilization"] = CameraDefaults.CAMERA_STABILIZATION_DEFAULT
         self.__camera_dictionary["preview"] = CameraDefaults.CAMERA_PREVIEW_DEFAULT
-        self.__camera_dictionary["debug"] = CameraDefaults.OTHER_DEBUG
 
     def get_camera(self):
         """
@@ -400,33 +386,6 @@ class CustomCamera:
         :return: the iso value
         """
         return self.__camera_dictionary["preview"]
-
-    def set_debug(self, debug):
-        """
-        Setting the debug value of the CustomCamera class
-        :param debug: The debug value we are trying to set
-        """
-        if debug == self.get_debug():
-            return
-        for val in get_valid_debug():
-            if debug == val:
-                self.__camera_dictionary["debug"] = debug
-                return
-        print("Error: Invalid Debug Value")
-
-    def get_debug(self):
-        """
-        Returns the value of the current debug value
-        :return: the debug value
-        """
-        return self.__camera_dictionary["debug"]
-
-    def get_ip(self):
-        """
-        Returns the value of the current ip value
-        :return: the ip value
-        """
-        return self.__camera_dictionary["ip"]
 
     def get_camera_port(self):
         """
