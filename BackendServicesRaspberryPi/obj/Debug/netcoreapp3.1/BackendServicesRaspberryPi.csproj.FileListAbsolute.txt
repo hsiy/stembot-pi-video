@@ -1,0 +1,10 @@
+C:\Users\Tim\Documents\School\10TenthSemester\Capstone\Capstone-Group7\BackendServicesRaspberryPi\bin\Debug\netcoreapp3.1\appsettings.Development.json
+C:\Users\Tim\Documents\School\10TenthSemester\Capstone\Capstone-Group7\BackendServicesRaspberryPi\bin\Debug\netcoreapp3.1\appsettings.json
+C:\Users\Tim\Documents\School\10TenthSemester\Capstone\Capstone-Group7\BackendServicesRaspberryPi\bin\Debug\netcoreapp3.1\Properties\launchSettings.json
+C:\Users\Tim\Documents\School\10TenthSemester\Capstone\Capstone-Group7\BackendServicesRaspberryPi\bin\Debug\netcoreapp3.1\BackendServicesRaspberryPi.exe
+C:\Users\Tim\Documents\School\10TenthSemester\Capstone\Capstone-Group7\BackendServicesRaspberryPi\obj\Debug\netcoreapp3.1\BackendServicesRaspberryPi.csprojAssemblyReference.cache
+C:\Users\Tim\Documents\School\10TenthSemester\Capstone\Capstone-Group7\BackendServicesRaspberryPi\obj\Debug\netcoreapp3.1\BackendServicesRaspberryPi.AssemblyInfoInputs.cache
+C:\Users\Tim\Documents\School\10TenthSemester\Capstone\Capstone-Group7\BackendServicesRaspberryPi\obj\Debug\netcoreapp3.1\BackendServicesRaspberryPi.AssemblyInfo.cs
+C:\Users\Tim\Documents\School\10TenthSemester\Capstone\Capstone-Group7\BackendServicesRaspberryPi\obj\Debug\netcoreapp3.1\BackendServicesRaspberryPi.RazorTargetAssemblyInfo.cache
+C:\Users\Tim\Documents\School\10TenthSemester\Capstone\Capstone-Group7\BackendServicesRaspberryPi\obj\Debug\netcoreapp3.1\staticwebassets\BackendServicesRaspberryPi.StaticWebAssets.Manifest.cache
+C:\Users\Tim\Documents\School\10TenthSemester\Capstone\Capstone-Group7\BackendServicesRaspberryPi\obj\Debug\netcoreapp3.1\staticwebassets\BackendServicesRaspberryPi.StaticWebAssets.xml

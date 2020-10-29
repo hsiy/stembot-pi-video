@@ -1,8 +1,19 @@
 {
   "version": 2,
-  "dgSpecHash": "bQaJ/SRsWqPN7xPWeJpLh1X63q+Roa0cAWfbgq08eyRYqRQe7YPuKBW4yjgsI9obU/a3dfeRzJkRykExz6zGGQ==",
+  "dgSpecHash": "35J5XOm+j/r25MiKmeVjv7vzHU8aZ0tDvmImb9Yurgv8mil1hu084AHgBv0K6HVpcNMyZlmHFriyD4GCy66ing==",
   "success": true,
   "projectFilePath": "C:\\Users\\Tim\\Documents\\School\\10TenthSemester\\Capstone\\Capstone-Group7\\BackendServicesRaspberryPi\\BackendServicesRaspberryPi.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\Tim\\.nuget\\packages\\asyncio\\0.1.69\\asyncio.0.1.69.nupkg.sha512",
+    "C:\\Users\\Tim\\.nuget\\packages\\microsoft.netcore.platforms\\2.0.0\\microsoft.netcore.platforms.2.0.0.nupkg.sha512",
+    "C:\\Users\\Tim\\.nuget\\packages\\nacl.net\\0.1.13\\nacl.net.0.1.13.nupkg.sha512",
+    "C:\\Users\\Tim\\.nuget\\packages\\netmq\\4.0.1.6\\netmq.4.0.1.6.nupkg.sha512",
+    "C:\\Users\\Tim\\.nuget\\packages\\system.net.http.winhttphandler\\4.4.0\\system.net.http.winhttphandler.4.4.0.nupkg.sha512",
+    "C:\\Users\\Tim\\.nuget\\packages\\system.private.servicemodel\\4.4.0\\system.private.servicemodel.4.4.0.nupkg.sha512",
+    "C:\\Users\\Tim\\.nuget\\packages\\system.reflection.dispatchproxy\\4.4.0\\system.reflection.dispatchproxy.4.4.0.nupkg.sha512",
+    "C:\\Users\\Tim\\.nuget\\packages\\system.security.principal.windows\\4.4.0\\system.security.principal.windows.4.4.0.nupkg.sha512",
+    "C:\\Users\\Tim\\.nuget\\packages\\system.servicemodel.primitives\\4.4.0\\system.servicemodel.primitives.4.4.0.nupkg.sha512",
+    "C:\\Users\\Tim\\.nuget\\packages\\system.valuetuple\\4.5.0\\system.valuetuple.4.5.0.nupkg.sha512"
+  ],
   "logs": []
 }
