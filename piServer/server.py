@@ -32,9 +32,10 @@ camera = customcamera.CustomCamera(resolution=option_parse.parse_args().resoluti
 other_functions = otherFunctions.OtherFunctions(ip=option_parse.parse_args().ip, debug=option_parse.parse_args().debug)
 
 context = zmq.Context()
-socket = context.socket(zmq.PUB)
+socket = context.socket(zmq.PAIR)
+port = 55555
 socket.set_hwm(1)
-socket.bind("tcp://*:" + str(camera.get_camera_port()))
+socket.connect("tcp://ec2-13-58-201-148.us-east-2.compute.amazonaws.com:%s" % port)
 
 stream = io.BytesIO()
 if option_parse.parse_args().preview:

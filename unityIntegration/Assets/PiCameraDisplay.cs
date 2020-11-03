@@ -11,7 +11,7 @@ public class PiCameraDisplay : MonoBehaviour
 
 
     // The hardcoded (for now) pi IP and port
-    private string piIP = "tcp://192.168.0.109:5454";
+    private string piIP = "tcp://ec2-13-58-201-148.us-east-2.compute.amazonaws.com:55005";
 
 
     Texture2D camTexture;

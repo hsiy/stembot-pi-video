@@ -1,5 +1,4 @@
 import zmq
-import cv2  # maybe? probably not though
 import socket
 
 STARTING_PORT = 10000
@@ -22,8 +21,23 @@ def add_back_port(port):
     AVAILABLE_PORTS.sort()
 
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(("ec2-13-58-201-148.us-east-2.compute.amazonaws.com", INITIALIZE_CONNECTION_PORT))
+# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# s.connect(("ec2-13-58-201-148.us-east-2.compute.amazonaws.com", INITIALIZE_CONNECTION_PORT))
 
+# receive from pi
+context = zmq.Context()
+socket_port = 55555
+socket = context.socket(zmq.PAIR)
+socket.set_hwm(1)
+socket.bind("tcp://*:%s" % socket_port)
 
+# send to unity
+context_send = zmq.Context()
+socket_send_port = 55005
+socket_send = context_send.socket(zmq.PUB)
+socket_send.set_hwm(1)
+socket_send.bind("tcp://*:%s" % socket_send_port)
 
+while True:
+    msg = socket.recv()
+    socket_send.send(msg)
