@@ -1,13 +1,16 @@
 #!/bin/bash
 
-script_version=1.1
+script_version=1.2
 python_version=3.7
-env_name=py3cv4
+env_name=py3cv2
 
 echo "Running Raspberry Pi4 setup script version: $script_version"
+cd ~
+
+# default password is stemPi90
 
 # clear space if these libraries exist
-echo -e "\nClearing random packackes that are not needed\n"
+# echo -e "\nClearing random packackes that are not needed\n"
 # sudo apt-get purge wolfram-engine
 # sudo apt-get purge libreoffice*
 # sudo apt-get clean
@@ -51,13 +54,15 @@ source ~/.bashrc
 
 echo -e "\nSetting up the env named: $env_name\n"
 mkvirtualenv $env_name -p python3
-/home/pi/.virtualenvs/py3cv4/bin/python -m pip install --upgrade pip
+/home/pi/.virtualenvs/$env_name/bin/python -m pip install --upgrade pip
 workon $env_name
 pip install numpy
 pip install -U opencv-python
 pip install picamera
-pip install uvloop
-pip install vidgear[asyncio]
 pip install zmq
+echo "workon $env_name" >> ~/.bashrc
+source ~/.bashrc
+
+mkdir ~/piServer
 
 cd ~
