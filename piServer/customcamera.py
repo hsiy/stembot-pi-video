@@ -1,9 +1,10 @@
 import picamera
+import io
+from threading import Thread
 
 
 class CameraDefaults:
     CAMERA_RESOLUTION_DEFAULT = "720p"
-    CAMERA_PORT_DEFAULT = 5454
     CAMERA_FRAME_RATE_DEFAULT = 30
     CAMERA_H_FLIP_DEFAULT = False
     CAMERA_V_FLIP_DEFAULT = False
@@ -13,8 +14,16 @@ class CameraDefaults:
     CAMERA_CONTRAST_DEFAULT = 0
     CAMERA_SATURATION_DEFAULT = 0
     CAMERA_STABILIZATION_DEFAULT = False
-    CAMERA_PREVIEW_DEFAULT = False
+    OTHER_DEBUG = False
 
+
+def get_valid_debug():
+    """
+    Static method that defines list of valid debug values
+    :return: list of valid debug values
+    """
+    # check if need to change to range 0-1600 from docs
+    return [True, False]
 
 def get_valid_resolutions():
     """
@@ -102,21 +111,14 @@ def get_valid_stabilization():
     return [True, False]
 
 
-def get_valid_preview():
-    """
-    Static method that defines list of valid preview values
-    :return: list of valid preview values
-    """
-    # check if need to change to range 0-1600 from docs
-    return [True, False]
-
-
 class CustomCamera:
     __camera_dictionary = dict()
     __camera = picamera.PiCamera()
+    __raw_data = io.BytesIO()
 
-    def __init__(self, resolution, framerate, hflip, vflip, rotation, iso, brightness, contrast, saturation, stabilization, preview, port=CameraDefaults.CAMERA_PORT_DEFAULT):
+    def __init__(self, resolution, framerate, hflip, vflip, rotation, iso, brightness, contrast, saturation, stabilization, debug):
         self.initialize_dictionary()
+        self.set_debug(debug)
         self.set_resolution(resolution)
         self.set_frame_rate(framerate)
         self.set_hflip(hflip)
@@ -127,8 +129,9 @@ class CustomCamera:
         self.set_contrast(contrast)
         self.set_saturation(saturation)
         self.set_stabilization(stabilization)
-        self.set_preview(preview)
-        self.__camera_dictionary["camera_port"] = port
+        self.__stream = self.__camera.capture_continuous(self.__raw_data, format="jpeg", use_video_port=True)
+        self.__frame = None
+        self.__stopped = False
 
     def initialize_dictionary(self):
         self.__camera_dictionary["resolution"] = CameraDefaults.CAMERA_RESOLUTION_DEFAULT
@@ -141,7 +144,46 @@ class CustomCamera:
         self.__camera_dictionary["contrast"] = CameraDefaults.CAMERA_CONTRAST_DEFAULT
         self.__camera_dictionary["saturation"] = CameraDefaults.CAMERA_SATURATION_DEFAULT
         self.__camera_dictionary["stabilization"] = CameraDefaults.CAMERA_STABILIZATION_DEFAULT
-        self.__camera_dictionary["preview"] = CameraDefaults.CAMERA_PREVIEW_DEFAULT
+        self.__camera_dictionary["debug"] = CameraDefaults.OTHER_DEBUG
+
+    def get_frame(self):
+        """
+        Returns the frame byte data of the current frame
+        :return: self.__frame
+        """
+        return self.__frame
+
+    def start(self):
+        """
+        Starts up the thread to read frames from the pi video stream
+        :return: self
+        """
+        Thread(target=self.update, args=()).start()
+        self.__stopped = False
+        return self
+
+    def stop(self):
+        """
+        Stops the current video stream
+        :return: self
+        """
+        self.__stopped = True
+        return self
+    
+    def update(self):
+        """
+        Returns the camera object from the picamera module
+        :return: self.__camera
+        """
+        for f in self.__stream:
+            self.__frame = f.getvalue()
+            self.__raw_data.seek(0)
+            if self.__stopped:
+                self.__stream.close()
+                break
+        self.__camera.close()
+        self.__raw_data.close()
+        return self
 
     def get_camera(self):
         """
@@ -366,30 +408,30 @@ class CustomCamera:
         :return: the iso value
         """
         return self.__camera_dictionary["stabilization"]
-
-    def set_preview(self, preview):
+    
+    def set_debug(self, debug):
         """
-        Setting the preview value of the CustomCamera class
-        :param preview: The preview value we are trying to set
+        Setting the debug value of the CustomCamera class
+        :param debug: The debug value we are trying to set
         """
-        if preview == self.get_preview():
+        if debug == self.get_debug():
             return
-        for val in get_valid_stabilization():
-            if preview == val:
-                self.__camera_dictionary["preview"] = preview
+        for val in get_valid_debug():
+            if debug == val:
+                self.__camera_dictionary["debug"] = debug
                 return
-        print("Error: Invalid Preview Value")
+        print("Error: Invalid Debug Value")
 
-    def get_preview(self):
+    def get_debug(self):
         """
-        Returns the value of the current iso value
-        :return: the iso value
+        Returns the value of the current debug value
+        :return: the debug value
         """
-        return self.__camera_dictionary["preview"]
-
-    def get_camera_port(self):
+        return self.__camera_dictionary["debug"]
+    
+    def __str__(self):
         """
-        Returns the value of the current camera_port value
-        :return: the camera_port value
+        Returns the string representation of the class
+        :return: the string representation
         """
-        return self.__camera_dictionary["camera_port"]
+        return "Resolution: {}\nFramerate: {}\nhflip: {}\nvflip: {}\nRotation: {}\nISO: {}\nBrightness: {}\nContrast: {}\nSaturation: {}\nStabilization: {}\nDebug: {}\n".format(self.get_resolution(), self.get_frame_rate(), self.get_hflip(), self.get_vflip(), self.get_rotation(), self.get_iso(), self.get_brightness(), self.get_contrast(), self.get_saturation(), self.get_stabilization(), self.get_debug())
