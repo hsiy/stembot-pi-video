@@ -28,6 +28,7 @@ option_parse.add_argument("--contrast", type=int, default=customcamera.CameraDef
 option_parse.add_argument("--saturation", type=int, default=customcamera.CameraDefaults.CAMERA_SATURATION_DEFAULT, help="Set the saturation value", choices=customcamera.get_valid_saturation())
 option_parse.add_argument("--stabilization", type=int, default=customcamera.CameraDefaults.CAMERA_STABILIZATION_DEFAULT, help="Set the stabilization value", choices=customcamera.get_valid_stabilization())
 option_parse.add_argument("--debug", type=bool, default=customcamera.CameraDefaults.OTHER_DEBUG, help="Shows debugging information", choices=customcamera.get_valid_debug())
+option_parse.add_argument("--data", type=bool, default=True, help="blocks data temporarily for ec2", choices=[True, False])
 
 args = vars(option_parse.parse_args())
 INITIALIZE_CONNECTION_PORT = 5050
@@ -69,26 +70,24 @@ try:
     zmq_port = set_up_connection(pi_name)
     if DEBUG:
         count_frame = 0
-        print("ZMQ_PORT:", zmq_port, "PI_NAME", pi_name)
-    """
-    context = zmq.Context()
-    socket = context.socket(zmq.PAIR)
-    socket.set_hwm(1)     
-    socket.connect("tcp://ec2-13-58-201-148.us-east-2.compute.amazonaws.com:%s" % zmq_port)
+        print("ZMQ_PORT:", zmq_port, "PI_NAME:", pi_name)
+    context_pi = zmq.Context()
+    pi_socket = context_pi.socket(zmq.PAIR)
+    pi_socket.set_hwm(1)     
+    pi_socket.connect("tcp://ec2-13-58-201-148.us-east-2.compute.amazonaws.com:%s" % zmq_port)
 
     camera = customcamera.CustomCamera(args)
     camera.start()
     time.sleep(.5)
     while camera.is_stopped():
-        socket.send(camera.get_frame())
+        if args["data"]:
+            pi_socket.send(camera.get_frame())
 
         # AI processing could go here in the future since the frame capture is on a separate thread
         
         if DEBUG:
             print("Sent: %s" % count_frame)
             count_frame = (count_frame + 1) % 100
-    """
 finally:
     camera.stop()
-    socket.close()
-    sock_init.close()
+    pi_socket.close()

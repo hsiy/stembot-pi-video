@@ -14,6 +14,7 @@ dict_lock = threading.Lock()
 
 option_parse = argparse.ArgumentParser(description="Set up of EC2 server")
 option_parse.add_argument("--debug", type=bool, default=False, help="Shows debugging information", choices=[True, False])
+option_parse.add_argument("--data", type=bool, default=True, help="blocks data temporarily for ec2", choices=[True, False])
 
 args = vars(option_parse.parse_args())
 
@@ -85,22 +86,22 @@ def thread_function(connection, ip, port):
     socket_send.set_hwm(1)
     socket_send.bind("tcp://*:%s" % (connections[connection_name]["port"] + OFFSET))
 
+    timer = None
+    from time import sleep
     while connections[connection_name]["active"]:
-
+        #timer = threading.Timer(10, thread_timer_freeup, args=[]).start()
         if args["debug"] and False:
             print_lock.acquire()
             print("Sent frame for: {0} number: {1}".format(connection_name, count_frame))
             print_lock.release()
             count_frame = (count_frame + 1) % 100
-            
-            """
+        
+        if args["data"]:
             msg = pi_socket.recv()
-            print("Sent: %s" % count_frame)
-            count_frame = (count_frame + 1) % 100
             socket_send.send(msg)
-"""
-
-    # threading.Timer(10, thread_timer_freeup, args=[])
+        else:
+            sleep(.1)
+        #timer.cancel()
     return
 
 
