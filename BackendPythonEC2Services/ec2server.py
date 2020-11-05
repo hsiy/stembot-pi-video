@@ -1,9 +1,21 @@
 import zmq
 import socket
+import threading
+import argparse
 
+OFFSET = 10000
 STARTING_PORT = 10000
-AVAILABLE_PORTS = [*range(10000, 20000, 1)]
-INITIALIZE_CONNECTION_PORT = 5000
+AVAILABLE_PORTS = 10000
+AVAILABLE_PORTS = [*range(STARTING_PORT, STARTING_PORT + AVAILABLE_PORTS, 1)]
+INITIALIZE_CONNECTION_PORT = 5050
+connections = dict()
+print_lock = threading.Lock()
+dict_lock = threading.Lock()
+
+option_parse = argparse.ArgumentParser(description="Set up of EC2 server")
+option_parse.add_argument("--debug", type=bool, default=False, help="Shows debugging information", choices=[True, False])
+
+args = vars(option_parse.parse_args())
 
 
 def find_new_port():
@@ -21,23 +33,89 @@ def add_back_port(port):
     AVAILABLE_PORTS.sort()
 
 
-# s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# s.connect(("ec2-13-58-201-148.us-east-2.compute.amazonaws.com", INITIALIZE_CONNECTION_PORT))
+def thread_timer_freeup(args):
+    print_lock.acquire()
+    print("Releasing connection: ")
+    print_lock.release()
+    return
 
-# receive from pi
-context = zmq.Context()
-socket_port = 55555
-socket = context.socket(zmq.PAIR)
-socket.set_hwm(1)
-socket.bind("tcp://*:%s" % socket_port)
 
-# send to unity
-context_send = zmq.Context()
-socket_send_port = 55005
-socket_send = context_send.socket(zmq.PUB)
-socket_send.set_hwm(1)
-socket_send.bind("tcp://*:%s" % socket_send_port)
+def thread_function(connection, ip, port):
+    
+    if args["debug"]:
+        print_lock.acquire()
+        print("IP: ", ip, "Port: ", port)
+        print_lock.release()
 
-while True:
-    msg = socket.recv()
-    socket_send.send(msg)
+    dict_lock.acquire()
+    new_port = find_new_port()
+    dict_lock.release()
+
+    connection_name = ""
+    while True:
+        data = connection.recv(8)
+        if len(data) <= 0:
+            break
+        connection_name += data.decode("utf-8")
+    
+    connection.sendall(str(new_port).encode("utf-8"))
+    connection.shutdown(socket.SHUT_WR)
+    connection.close()
+
+    if args["debug"]:
+        print_lock.acquire()
+        print("The port: {0} will be used for the connection: {1}".format(new_port, connection_name))
+        print_lock.release()
+
+    dict_lock.acquire()
+    connections[connection_name] = dict()
+    connections[connection_name]["port"] = new_port
+    connections[connection_name]["active"] = True
+    dict_lock.release()
+
+    # receive from pi
+    context_pi = zmq.Context()
+    pi_socket = context_pi.socket(zmq.PAIR)
+    pi_socket.set_hwm(1)
+    pi_socket.bind("tcp://*:%s" % connections[connection_name]["port"])
+
+    # send to unity
+    context_send = zmq.Context()
+    socket_send = context_send.socket(zmq.PUB)
+    socket_send.set_hwm(1)
+    socket_send.bind("tcp://*:%s" % (connections[connection_name]["port"] + OFFSET))
+
+    while connections[connection_name]["active"]:
+
+        if args["debug"] and False:
+            print_lock.acquire()
+            print("Sent frame for: {0} number: {1}".format(connection_name, count_frame))
+            print_lock.release()
+            count_frame = (count_frame + 1) % 100
+            
+            """
+            msg = pi_socket.recv()
+            print("Sent: %s" % count_frame)
+            count_frame = (count_frame + 1) % 100
+            socket_send.send(msg)
+"""
+
+    # threading.Timer(10, thread_timer_freeup, args=[])
+    return
+
+
+#with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as inc_sock:
+try:
+    if args["debug"]:
+        print_lock.acquire()
+        print("Starting EC2 Server.")
+        print_lock.release()
+
+    inc_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    inc_sock.bind((socket.gethostbyname(socket.gethostname()), INITIALIZE_CONNECTION_PORT))
+    inc_sock.listen(5)
+    while True:
+        connection, address = inc_sock.accept()
+        threading.Thread(target=thread_function, args=(connection, address[0], address[1])).start()
+finally:
+    inc_sock.close()
