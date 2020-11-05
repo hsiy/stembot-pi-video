@@ -116,19 +116,19 @@ class CustomCamera:
     __camera = picamera.PiCamera()
     __raw_data = io.BytesIO()
 
-    def __init__(self, resolution, framerate, hflip, vflip, rotation, iso, brightness, contrast, saturation, stabilization, debug):
+    def __init__(self, args):
         self.initialize_dictionary()
-        self.set_debug(debug)
-        self.set_resolution(resolution)
-        self.set_frame_rate(framerate)
-        self.set_hflip(hflip)
-        self.set_vflip(vflip)
-        self.set_rotation(rotation)
-        self.set_iso(iso)
-        self.set_brightness(brightness)
-        self.set_contrast(contrast)
-        self.set_saturation(saturation)
-        self.set_stabilization(stabilization)
+        self.set_debug(args["debug"])
+        self.set_resolution(args["resolution"])
+        self.set_frame_rate(args["framerate"])
+        self.set_hflip(args["hflip"])
+        self.set_vflip(args["vflip"])
+        self.set_rotation(args["rotation"])
+        self.set_iso(args["iso"])
+        self.set_brightness(args["brightness"])
+        self.set_contrast(args["contrast"])
+        self.set_saturation(args["saturation"])
+        self.set_stabilization(args["stabilization"])
         self.__stream = self.__camera.capture_continuous(self.__raw_data, format="jpeg", use_video_port=True)
         self.__frame = None
         self.__stopped = False
@@ -152,6 +152,13 @@ class CustomCamera:
         :return: self.__frame
         """
         return self.__frame
+
+    def is_stopped(self):
+        """
+        Returns the frame byte data of the current frame
+        :return: !self.__stopped
+        """
+        return not self.__stopped
 
     def start(self):
         """
@@ -211,7 +218,8 @@ class CustomCamera:
                 self.__camera_dictionary["resolution"] = resolution
                 self.__camera.resolution = resolution
                 return
-        print("Error: Invalid Resolution Value")
+        if self.get_debug():
+            print("Error: Invalid Resolution Value")
 
     def get_resolution(self):
         """
@@ -232,7 +240,8 @@ class CustomCamera:
                 self.__camera_dictionary["framerate"] = framerate
                 self.__camera.framerate = framerate
                 return
-        print("Error: Invalid Framerate Value")
+        if self.get_debug():
+            print("Error: Invalid Framerate Value")
 
     def get_frame_rate(self):
         """
@@ -253,7 +262,8 @@ class CustomCamera:
                 self.__camera_dictionary["hflip"] = hflip
                 self.__camera.hflip = hflip
                 return
-        print("Error: Invalid hflip Value")
+        if self.get_debug():
+            print("Error: Invalid hflip Value")
 
     def get_hflip(self):
         """
@@ -274,7 +284,8 @@ class CustomCamera:
                 self.__camera_dictionary["vflip"] = vflip
                 self.__camera.vflip = vflip
                 return
-        print("Error: Invalid vflip Value")
+        if self.get_debug():
+            print("Error: Invalid vflip Value")
 
     def get_vflip(self):
         """
@@ -295,7 +306,8 @@ class CustomCamera:
                 self.__camera_dictionary["rotation"] = rotation
                 self.__camera.rotation = rotation
                 return
-        print("Error: Invalid Rotation Value")
+        if self.get_debug():
+            print("Error: Invalid Rotation Value")
 
     def get_rotation(self):
         """
@@ -316,7 +328,8 @@ class CustomCamera:
                 self.__camera_dictionary["iso"] = iso
                 self.__camera.iso = iso
                 return
-        print("Error: Invalid ISO Value")
+        if self.get_debug():
+            print("Error: Invalid ISO Value")
 
     def get_iso(self):
         """
@@ -337,7 +350,8 @@ class CustomCamera:
                 self.__camera_dictionary["brightness"] = brightness
                 self.__camera.brightness = brightness
                 return
-        print("Error: Invalid Brightness Value")
+        if self.get_debug():
+            print("Error: Invalid Brightness Value")
 
     def get_brightness(self):
         """
@@ -358,7 +372,8 @@ class CustomCamera:
                 self.__camera_dictionary["contrast"] = contrast
                 self.__camera.contrast = contrast
                 return
-        print("Error: Invalid Contrast Value")
+        if self.get_debug():
+            print("Error: Invalid Contrast Value")
 
     def get_contrast(self):
         """
@@ -379,7 +394,8 @@ class CustomCamera:
                 self.__camera_dictionary["saturation"] = saturation
                 self.__camera.saturation = saturation
                 return
-        print("Error: Invalid Saturation Value")
+        if self.get_debug():
+            print("Error: Invalid Saturation Value")
 
     def get_saturation(self):
         """
@@ -400,7 +416,8 @@ class CustomCamera:
                 self.__camera_dictionary["stabilization"] = stabilization
                 self.__camera.iso = stabilization
                 return
-        print("Error: Invalid Stabilization Value")
+        if self.get_debug():
+            print("Error: Invalid Stabilization Value")
 
     def get_stabilization(self):
         """
@@ -420,7 +437,8 @@ class CustomCamera:
             if debug == val:
                 self.__camera_dictionary["debug"] = debug
                 return
-        print("Error: Invalid Debug Value")
+        if self.get_debug():
+            print("Error: Invalid Debug Value")
 
     def get_debug(self):
         """
