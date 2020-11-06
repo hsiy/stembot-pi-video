@@ -133,6 +133,13 @@ class CustomCamera:
         self.__frame = None
         self.__stopped = False
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.__camera.close()
+        self.__raw_data.close()
+
     def initialize_dictionary(self):
         self.__camera_dictionary["resolution"] = CameraDefaults.CAMERA_RESOLUTION_DEFAULT
         self.__camera_dictionary["framerate"] = CameraDefaults.CAMERA_FRAME_RATE_DEFAULT
