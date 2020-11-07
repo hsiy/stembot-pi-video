@@ -109,6 +109,10 @@ def find_new_port():
 
 
 def add_back_port():
+    if command_args["debug"]:
+        print_lock.acquire()
+        print("Adding ports back if any exist.")
+        print_lock.release()
     for port in USED_PORTS:
         AVAILABLE_PORTS.append(port)
     AVAILABLE_PORTS.sort()

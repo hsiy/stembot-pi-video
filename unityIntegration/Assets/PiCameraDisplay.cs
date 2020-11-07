@@ -11,7 +11,9 @@ public class PiCameraDisplay : MonoBehaviour
 
 
     // The hardcoded (for now) pi IP and port
-    private string piIP = "tcp://ec2-13-58-201-148.us-east-2.compute.amazonaws.com:55005";
+    private int port = 10000;
+    private int offset = 10000;
+    private string piIP = "tcp://ec2-13-58-201-148.us-east-2.compute.amazonaws.com:";
 
 
     Texture2D camTexture;
@@ -34,7 +36,7 @@ public class PiCameraDisplay : MonoBehaviour
         this.canvas = GetComponent<Canvas>();
 
         // Create and start listener object
-        _netMqListener = new NetMqListener(HandleMessage, piIP);
+        _netMqListener = new NetMqListener(HandleMessage, piIP + (port + offset));
         _netMqListener.Start();
     }
 
