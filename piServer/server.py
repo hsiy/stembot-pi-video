@@ -8,9 +8,10 @@ More details.
 
 import argparse
 import customcamera
-import time
+from time import sleep
 import zmq
 import socket
+
 
 """Entry point for pyserver
 Entry point for the pyserver. Will process arguments
@@ -28,66 +29,105 @@ option_parse.add_argument("--contrast", type=int, default=customcamera.CameraDef
 option_parse.add_argument("--saturation", type=int, default=customcamera.CameraDefaults.CAMERA_SATURATION_DEFAULT, help="Set the saturation value", choices=customcamera.get_valid_saturation())
 option_parse.add_argument("--stabilization", type=int, default=customcamera.CameraDefaults.CAMERA_STABILIZATION_DEFAULT, help="Set the stabilization value", choices=customcamera.get_valid_stabilization())
 option_parse.add_argument("--debug", type=bool, default=customcamera.CameraDefaults.OTHER_DEBUG, help="Shows debugging information", choices=customcamera.get_valid_debug())
-option_parse.add_argument("--data", type=bool, default=True, help="blocks data temporarily for ec2", choices=[True, False])
 
 args = vars(option_parse.parse_args())
 INITIALIZE_CONNECTION_PORT = 5050
+COMM_PORT = 5051
+OFFSET = 10000
 DEBUG = args["debug"]
 port_zmq = ""
 pi_name = None
+ec2_host = "ec2-13-58-201-148.us-east-2.compute.amazonaws.com"
 
-def get_PI_name():
+
+class ZMQCommunication:
+
+    def __init__(self, port, host=ec2_host):
+        self.__context = zmq.Context()
+        # comm with pi
+        self.__socket_comm = self.__context.socket(zmq.PAIR)
+        self.__socket_comm.connect("tcp://{0}:{1}".format(host, (port + (OFFSET * 2))))
+        # receive from pi
+        self.__pi_socket = self.__context.socket(zmq.PAIR)
+        #self.__pi_socket.set_hwm(1)
+        self.__pi_socket.connect("tcp://{0}:{1}".format(host, port))
+        # poller
+        self.__poller = zmq.Poller()
+        self.__poller.register(self.__socket_comm, zmq.POLLIN)
+        self.__poller.register(self.__pi_socket, zmq.POLLIN)
+
+    def poll(self, timeout=0):
+        return self.__poller.poll(timeout)
+
+    def get_socket_comm(self):
+        return self.__socket_comm
+
+    def get_pi_socket(self):
+        return self.__pi_socket
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.__socket_comm.close()
+        self.__pi_socket.close()
+        self.__context.term()
+
+
+def get_pi_name():
     with open("pi_label.txt", "r") as f:
-        pi_name = f.readline()
-    if not pi_name:
+        name = f.readline()
+    if not name:
         if DEBUG:
             print("Error defining the PI name.")
         raise
-    return str(pi_name)
+    return str(name).strip()
 
-def set_up_connection(name):
+
+def set_up_connection():
     port = ""
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock_init:
-        sock_init.connect(("ec2-13-58-201-148.us-east-2.compute.amazonaws.com", INITIALIZE_CONNECTION_PORT))
-        sock_init.sendall(name.encode("utf-8"))
-        sock_init.shutdown(socket.SHUT_WR)
+        sock_init.connect((ec2_host, INITIALIZE_CONNECTION_PORT))
 
         while True:
-            msg = sock_init.recv(8)
-            if len(msg) <= 0:
+            msg_port = sock_init.recv(16)
+            if len(msg_port) <= 0:
                 break
-            port += msg.decode("utf-8")
+            port += msg_port.decode("utf-8")
 
     if not port:
-        if DEBUG:
-            print("Error setting up port for connnection")
-        raise
+        raise ConnectionError("Error setting up port for connection")
     return int(port)
 
 
 try:
-    pi_name = get_PI_name()
-    zmq_port = set_up_connection(pi_name)
-    if DEBUG:
-        count_frame = 0
-        print("ZMQ_PORT:", zmq_port, "PI_NAME:", pi_name)
-    context_pi = zmq.Context()
-    pi_socket = context_pi.socket(zmq.PAIR)
-    pi_socket.set_hwm(1)     
-    pi_socket.connect("tcp://ec2-13-58-201-148.us-east-2.compute.amazonaws.com:%s" % zmq_port)
+    pi_name = get_pi_name()
+    zmq_port = set_up_connection()
+    sleep(2)
+    with ZMQCommunication(zmq_port) as ZMQComm:
+        with customcamera.CustomCamera(args) as cam:
+            ZMQComm.get_socket_comm().send_string(pi_name)
+            cam.start()
+            sleep(1)
+            if DEBUG:
+                count_frame = 0
+                print("ZMQ_PORT:", zmq_port, "PI_NAME:", pi_name)
+            while cam.is_stopped():
+                has_next = True
+                while has_next:
+                    has_next = False
+                    if ZMQComm.get_socket_comm() in dict(ZMQComm.poll(50)):
+                        has_next = True
+                        msg = ZMQComm.get_socket_comm().recv()
+                        print("Socket Comm has a message")
 
-    camera = customcamera.CustomCamera(args)
-    camera.start()
-    time.sleep(.5)
-    while camera.is_stopped():
-        if args["data"]:
-            pi_socket.send(camera.get_frame())
+                ZMQComm.get_pi_socket().send(cam.get_frame())
 
-        # AI processing could go here in the future since the frame capture is on a separate thread
-        
-        if DEBUG:
-            print("Sent: %s" % count_frame)
-            count_frame = (count_frame + 1) % 100
+                # AI processing could go here in the future since the frame capture is on a separate thread
+
+                if DEBUG:
+                    print("Sent: %s" % count_frame)
+                    count_frame = (count_frame + 1) % 100
+
 finally:
-    camera.stop()
-    pi_socket.close()
+    pass
