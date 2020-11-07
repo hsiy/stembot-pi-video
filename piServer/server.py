@@ -48,8 +48,8 @@ class ZMQCommunication:
         self.__socket_comm = self.__context.socket(zmq.PAIR)
         self.__socket_comm.connect("tcp://{0}:{1}".format(host, (port + (OFFSET * 2))))
         # receive from pi
-        self.__pi_socket = self.__context.socket(zmq.PAIR)
-        #self.__pi_socket.set_hwm(1)
+        self.__pi_socket = self.__context.socket(zmq.PUB)
+        self.__pi_socket.set_hwm(1)
         self.__pi_socket.connect("tcp://{0}:{1}".format(host, port))
         # poller
         self.__poller = zmq.Poller()

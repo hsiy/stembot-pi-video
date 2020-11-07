@@ -28,9 +28,9 @@ class ZMQCommunication:
     def __init__(self, port):
         self.__context = zmq.Context()
         # receive from pi
-        self.__pi_socket = self.__context.socket(zmq.PAIR)
-        #self.__pi_socket.subscribe(str(port))
-        #self.__pi_socket.set_hwm(1)
+        self.__pi_socket = self.__context.socket(zmq.SUB)
+        self.__pi_socket.setsockopt_string(zmq.SUBSCRIBE, "")
+        self.__pi_socket.set_hwm(1)
         self.__pi_socket.bind("tcp://*:{0}".format(port))
         # comm with pi
         self.__socket_comm = self.__context.socket(zmq.PAIR)
