@@ -137,6 +137,7 @@ class CustomCamera:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
         self.__camera.close()
         self.__raw_data.close()
 
@@ -187,7 +188,7 @@ class CustomCamera:
     def update(self):
         """
         Returns the camera object from the picamera module
-        :return: self.__camera
+        :return: self
         """
         for f in self.__stream:
             self.__frame = f.getvalue()
@@ -195,8 +196,6 @@ class CustomCamera:
             if self.__stopped:
                 self.__stream.close()
                 break
-        self.__camera.close()
-        self.__raw_data.close()
         return self
 
     def get_camera(self):

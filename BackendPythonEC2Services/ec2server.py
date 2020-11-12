@@ -10,6 +10,7 @@ STARTING_PORT = 10000
 AVAILABLE_PORTS = 10000
 AVAILABLE_PORTS = [*range(STARTING_PORT, STARTING_PORT + AVAILABLE_PORTS, 1)]
 INITIALIZE_CONNECTION_PORT = 5050
+GET_AVAILABLE_CONNECTIONS_PORT = 5051
 USED_PORTS = []
 
 connections = dict()
@@ -118,6 +119,21 @@ def add_back_port():
     AVAILABLE_PORTS.sort()
 
 
+def thread_available_connections():
+    try:
+        context = zmq.Context()
+        socket_send_data = context.socket(zmq.PUB)
+        socket_send_data.set_hwm(1)
+        socket_send_data.bind("tcp://*:{0}".format(GET_AVAILABLE_CONNECTIONS_PORT))
+        while True:
+            sleep(2)
+            # print(get_active_connections())
+            socket_send_data.send_json(get_active_connections())
+    finally:
+        context.term()
+
+
+
 def thread_add_back():
     while True:
         sleep(5 * 60)
@@ -172,7 +188,7 @@ def thread_function(new_port):
             has_next = True
             while has_next:
                 has_next = False
-                poll = dict(ZMQComm.poll(100))
+                poll = dict(ZMQComm.poll(5))
                 if ZMQComm.get_pi_socket() in poll:
                     timer.restart()
                     has_next = True
@@ -200,6 +216,7 @@ if command_args["debug"]:
     print_lock.release()
 
 threading.Thread(target=thread_add_back).start()
+threading.Thread(target=thread_available_connections).start()
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as inc_sock:
     inc_sock.bind((socket.gethostbyname(socket.gethostname()), INITIALIZE_CONNECTION_PORT))
     inc_sock.listen(5)

@@ -11,7 +11,7 @@ public class PiCameraDisplay : MonoBehaviour
 
 
     // The hardcoded (for now) pi IP and port
-    private int port = 10000;
+    private int port = 10001;
     private int offset = 10000;
     private string piIP = "tcp://ec2-13-58-201-148.us-east-2.compute.amazonaws.com:";
 
