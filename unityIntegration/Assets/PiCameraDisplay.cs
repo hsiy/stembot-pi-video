@@ -11,9 +11,9 @@ public class PiCameraDisplay : MonoBehaviour
 
 
     // The hardcoded (for now) pi IP and port
-    private int port = 10001;
+    private int port;
     private int offset = 10000;
-    private string piIP = "tcp://ec2-13-58-201-148.us-east-2.compute.amazonaws.com:";
+    private string serverIP = "tcp://ec2-13-58-201-148.us-east-2.compute.amazonaws.com:";
 
 
     Texture2D camTexture;
@@ -30,13 +30,17 @@ public class PiCameraDisplay : MonoBehaviour
     // Script Start
     private void Start()
     {
+		
+        port = DropDownMenu.port;
+        UnityEngine.Debug.Log(port);
+        
         //initialize cam texture and get the raw image
         this.camTexture = new Texture2D(2, 2);
         this.screenDisplay = GetComponent<RawImage>();
         this.canvas = GetComponent<Canvas>();
 
         // Create and start listener object
-        _netMqListener = new NetMqListener(HandleMessage, piIP + (port + offset));
+        _netMqListener = new NetMqListener(HandleMessage, serverIP + (port + offset));
         _netMqListener.Start();
     }
 
@@ -83,14 +87,14 @@ public class NetMqListener
     // This is a queue that contains all the data that still needs to be handed off
     private readonly ConcurrentQueue<byte[]> _messageQueue = new ConcurrentQueue<byte[]>();
 
-    // Pi ip address and port number
-    private string piIP;
+    // Pi's server ip address and port number
+    private string serverIP;
 
     // Listener object constuctor
-    public NetMqListener(MessageDelegate messageDelegate, string piIPin)
+    public NetMqListener(MessageDelegate messageDelegate, string serverIPin)
     {
         // Assign IP and port
-        piIP = piIPin;
+        serverIP = serverIPin;
 
         //Read in delegate function and spin up listener thread
         _messageDelegate = messageDelegate;
@@ -118,7 +122,7 @@ public class NetMqListener
             subSocket.Options.ReceiveHighWatermark = 1;
 
             //connect socket with IP
-            subSocket.Connect(this.piIP);
+            subSocket.Connect(this.serverIP);
 
             //socket.subscribe(topic) 
             //Because we don't care about having a topic we send 
@@ -134,7 +138,7 @@ public class NetMqListener
 
                 //print out findings to Log
                 //Prolly remove this later...
-                UnityEngine.Debug.Log(frameBytes.ToString());
+                //UnityEngine.Debug.Log(frameBytes.ToString());
 
                 //Enqueue data into list to be handled
                 _messageQueue.Enqueue(frameBytes);
