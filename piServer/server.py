@@ -19,9 +19,9 @@ and establish the connection with the ec2 server.
 """
 option_parse = argparse.ArgumentParser(description="Set up of Raspberry Pi Camera streaming module")
 option_parse.add_argument("--resolution", type=str, default=customcamera.CameraDefaults.CAMERA_RESOLUTION_DEFAULT, help="Set the resolution of the camera", choices=customcamera.get_valid_resolutions())
-option_parse.add_argument("--framerate", type=int, default=customcamera.CameraDefaults.CAMERA_FRAME_RATE_DEFAULT, help="Set the frame rate", choices=customcamera.get_valid_frame_rate())
-option_parse.add_argument("--hflip", type=bool, default=customcamera.CameraDefaults.CAMERA_H_FLIP_DEFAULT, help="Set the h-flip value", choices=customcamera.get_valid_hflip())
-option_parse.add_argument("--vflip", type=bool, default=customcamera.CameraDefaults.CAMERA_V_FLIP_DEFAULT, help="Set the v-flip value", choices=customcamera.get_valid_vflip())
+option_parse.add_argument("--framerate", type=int, default=customcamera.CameraDefaults.CAMERA_FRAMERATE_DEFAULT, help="Set the frame rate", choices=customcamera.get_valid_framerate())
+option_parse.add_argument("--hflip", type=bool, default=customcamera.CameraDefaults.CAMERA_HFLIP_DEFAULT, help="Set the h-flip value", choices=customcamera.get_valid_hflip())
+option_parse.add_argument("--vflip", type=bool, default=customcamera.CameraDefaults.CAMERA_VFLIP_DEFAULT, help="Set the v-flip value", choices=customcamera.get_valid_vflip())
 option_parse.add_argument("--rotation", type=int, default=customcamera.CameraDefaults.CAMERA_ROTATION_DEFAULT, help="Set the rotation value", choices=customcamera.get_valid_rotation())
 option_parse.add_argument("--iso", type=int, default=customcamera.CameraDefaults.CAMERA_ISO_DEFAULT, help="Set the ISO value", choices=customcamera.get_valid_iso())
 option_parse.add_argument("--brightness", type=int, default=customcamera.CameraDefaults.CAMERA_BRIGHTNESS_DEFAULT, help="Set the brightness value", choices=customcamera.get_valid_brightness())

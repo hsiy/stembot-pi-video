@@ -4,10 +4,10 @@ from threading import Thread
 
 
 class CameraDefaults:
-    CAMERA_RESOLUTION_DEFAULT = "720p"
-    CAMERA_FRAME_RATE_DEFAULT = 30
-    CAMERA_H_FLIP_DEFAULT = False
-    CAMERA_V_FLIP_DEFAULT = False
+    CAMERA_RESOLUTION_DEFAULT = "480p"
+    CAMERA_FRAMERATE_DEFAULT = 60
+    CAMERA_HFLIP_DEFAULT = False
+    CAMERA_VFLIP_DEFAULT = False
     CAMERA_ROTATION_DEFAULT = 0
     CAMERA_ISO_DEFAULT = 0
     CAMERA_BRIGHTNESS_DEFAULT = 50
@@ -25,6 +25,7 @@ def get_valid_debug():
     # check if need to change to range 0-1600 from docs
     return [True, False]
 
+
 def get_valid_resolutions():
     """
     Static method that defines list of valid resolutions
@@ -33,12 +34,12 @@ def get_valid_resolutions():
     return ["720p", "480p", "360p", "240p"]
 
 
-def get_valid_frame_rate():
+def get_valid_framerate():
     """
     Static method that defines list of valid frame rates
     :return: list of valid frame rates
     """
-    return [*range(5, 91, 5)]
+    return [*range(5, 61, 5)]
 
 
 def get_valid_hflip():
@@ -117,18 +118,30 @@ class CustomCamera:
     __raw_data = io.BytesIO()
 
     def __init__(self, args):
+        args = dict(args)
         self.initialize_dictionary()
-        self.set_debug(args["debug"])
-        self.set_resolution(args["resolution"])
-        self.set_frame_rate(args["framerate"])
-        self.set_hflip(args["hflip"])
-        self.set_vflip(args["vflip"])
-        self.set_rotation(args["rotation"])
-        self.set_iso(args["iso"])
-        self.set_brightness(args["brightness"])
-        self.set_contrast(args["contrast"])
-        self.set_saturation(args["saturation"])
-        self.set_stabilization(args["stabilization"])
+        if "debug" in args:
+            self.set_debug(args["debug"])
+        if "resolution" in args:
+            self.set_resolution(args["resolution"])
+        if "framerate" in args:
+            self.set_framerate(args["framerate"])
+        if "hflip" in args:
+            self.set_hflip(args["hflip"])
+        if "vflip" in args:
+            self.set_vflip(args["vflip"])
+        if "rotation" in args:
+            self.set_rotation(args["rotation"])
+        if "iso" in args:
+            self.set_iso(args["iso"])
+        if "brightness" in args:
+            self.set_brightness(args["brightness"])
+        if "contrast" in args:
+            self.set_contrast(args["contrast"])
+        if "saturation" in args:
+            self.set_saturation(args["saturation"])
+        if "stabilization" in args:
+            self.set_stabilization(args["stabilization"])
         self.__stream = self.__camera.capture_continuous(self.__raw_data, format="jpeg", use_video_port=True)
         self.__frame = None
         self.__stopped = False
@@ -143,15 +156,25 @@ class CustomCamera:
 
     def initialize_dictionary(self):
         self.__camera_dictionary["resolution"] = CameraDefaults.CAMERA_RESOLUTION_DEFAULT
-        self.__camera_dictionary["framerate"] = CameraDefaults.CAMERA_FRAME_RATE_DEFAULT
-        self.__camera_dictionary["hflip"] = CameraDefaults.CAMERA_H_FLIP_DEFAULT
-        self.__camera_dictionary["vflip"] = CameraDefaults.CAMERA_V_FLIP_DEFAULT
+        self.__camera.resolution = (854, 480)
+        self.__camera_dictionary["framerate"] = CameraDefaults.CAMERA_FRAMERATE_DEFAULT
+        self.__camera.framerate = CameraDefaults.CAMERA_FRAMERATE_DEFAULT
+        self.__camera_dictionary["hflip"] = CameraDefaults.CAMERA_HFLIP_DEFAULT
+        self.__camera.hflip = CameraDefaults.CAMERA_HFLIP_DEFAULT
+        self.__camera_dictionary["vflip"] = CameraDefaults.CAMERA_VFLIP_DEFAULT
+        self.__camera.vflip = CameraDefaults.CAMERA_VFLIP_DEFAULT
         self.__camera_dictionary["rotation"] = CameraDefaults.CAMERA_ROTATION_DEFAULT
+        self.__camera.rotation = CameraDefaults.CAMERA_ROTATION_DEFAULT
         self.__camera_dictionary["iso"] = CameraDefaults.CAMERA_ISO_DEFAULT
+        self.__camera.iso = CameraDefaults.CAMERA_ISO_DEFAULT
         self.__camera_dictionary["brightness"] = CameraDefaults.CAMERA_BRIGHTNESS_DEFAULT
+        self.__camera.brightness = CameraDefaults.CAMERA_BRIGHTNESS_DEFAULT
         self.__camera_dictionary["contrast"] = CameraDefaults.CAMERA_CONTRAST_DEFAULT
+        self.__camera.contrast = CameraDefaults.CAMERA_CONTRAST_DEFAULT
         self.__camera_dictionary["saturation"] = CameraDefaults.CAMERA_SATURATION_DEFAULT
+        self.__camera.saturation = CameraDefaults.CAMERA_SATURATION_DEFAULT
         self.__camera_dictionary["stabilization"] = CameraDefaults.CAMERA_STABILIZATION_DEFAULT
+        self.__camera.video_stabilization = CameraDefaults.CAMERA_STABILIZATION_DEFAULT
         self.__camera_dictionary["debug"] = CameraDefaults.OTHER_DEBUG
 
     def get_frame(self):
@@ -222,7 +245,14 @@ class CustomCamera:
         for val in get_valid_resolutions():
             if resolution == val:
                 self.__camera_dictionary["resolution"] = resolution
-                self.__camera.resolution = resolution
+                if resolution == "720p":
+                    self.__camera.resolution = (1280, 720)
+                elif resolution == "480p":
+                    self.__camera.resolution = (854, 480)
+                elif resolution == "360p":
+                    self.__camera.resolution = (640, 360)
+                elif resolution == "240p":
+                    self.__camera.resolution = (432, 240)
                 return
         if self.get_debug():
             print("Error: Invalid Resolution Value")
@@ -234,14 +264,14 @@ class CustomCamera:
         """
         return self.__camera_dictionary["resolution"]
 
-    def set_frame_rate(self, framerate):
+    def set_framerate(self, framerate):
         """
         Setting the framerate value of the CustomCamera class
         :param framerate: The framerate value we are trying to set
         """
-        if framerate == self.get_frame_rate():
+        if framerate == self.get_framerate():
             return
-        for val in get_valid_frame_rate():
+        for val in get_valid_framerate():
             if framerate == val:
                 self.__camera_dictionary["framerate"] = framerate
                 self.__camera.framerate = framerate
@@ -249,7 +279,7 @@ class CustomCamera:
         if self.get_debug():
             print("Error: Invalid Framerate Value")
 
-    def get_frame_rate(self):
+    def get_framerate(self):
         """
         Returns the value of the current framerate value
         :return: the framerate value
@@ -273,8 +303,8 @@ class CustomCamera:
 
     def get_hflip(self):
         """
-        Returns the value of the current stabilization value
-        :return: the stabilization value
+        Returns the value of the current hflip value
+        :return: the hflip value
         """
         return self.__camera_dictionary["hflip"]
 
@@ -295,8 +325,8 @@ class CustomCamera:
 
     def get_vflip(self):
         """
-        Returns the value of the current stabilization value
-        :return: the stabilization value
+        Returns the value of the current vflip value
+        :return: the vflip value
         """
         return self.__camera_dictionary["vflip"]
 
@@ -329,7 +359,7 @@ class CustomCamera:
         """
         if iso == self.get_iso():
             return
-        for val in get_valid_stabilization():
+        for val in get_valid_iso():
             if iso == val:
                 self.__camera_dictionary["iso"] = iso
                 self.__camera.iso = iso
@@ -351,7 +381,7 @@ class CustomCamera:
         """
         if brightness == self.get_brightness():
             return
-        for val in get_valid_stabilization():
+        for val in get_valid_brightness():
             if brightness == val:
                 self.__camera_dictionary["brightness"] = brightness
                 self.__camera.brightness = brightness
@@ -373,7 +403,7 @@ class CustomCamera:
         """
         if contrast == self.get_contrast():
             return
-        for val in get_valid_stabilization():
+        for val in get_valid_contrast():
             if contrast == val:
                 self.__camera_dictionary["contrast"] = contrast
                 self.__camera.contrast = contrast
@@ -395,7 +425,7 @@ class CustomCamera:
         """
         if saturation == self.get_saturation():
             return
-        for val in get_valid_stabilization():
+        for val in get_valid_saturation():
             if saturation == val:
                 self.__camera_dictionary["saturation"] = saturation
                 self.__camera.saturation = saturation
@@ -420,7 +450,7 @@ class CustomCamera:
         for val in get_valid_stabilization():
             if stabilization == val:
                 self.__camera_dictionary["stabilization"] = stabilization
-                self.__camera.iso = stabilization
+                self.__camera.video_stabilization = stabilization
                 return
         if self.get_debug():
             print("Error: Invalid Stabilization Value")
@@ -458,4 +488,4 @@ class CustomCamera:
         Returns the string representation of the class
         :return: the string representation
         """
-        return "Resolution: {}\nFramerate: {}\nhflip: {}\nvflip: {}\nRotation: {}\nISO: {}\nBrightness: {}\nContrast: {}\nSaturation: {}\nStabilization: {}\nDebug: {}\n".format(self.get_resolution(), self.get_frame_rate(), self.get_hflip(), self.get_vflip(), self.get_rotation(), self.get_iso(), self.get_brightness(), self.get_contrast(), self.get_saturation(), self.get_stabilization(), self.get_debug())
+        return "Resolution: {} or {}\nFramerate: {}\nhflip: {}\nvflip: {}\nRotation: {}\nISO: {}\nBrightness: {}\nContrast: {}\nSaturation: {}\nStabilization: {}\nDebug: {}\n".format(self.get_resolution(), self.__camera.resolution, self.get_framerate(), self.get_hflip(), self.get_vflip(), self.get_rotation(), self.get_iso(), self.get_brightness(), self.get_contrast(), self.get_saturation(), self.get_stabilization(), self.get_debug())
