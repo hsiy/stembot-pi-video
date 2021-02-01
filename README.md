@@ -1,6 +1,6 @@
-# Capstone-Group7
+# STEMBot Pi Integration
 
-Repository for Group 7 capstone project.
+Repository for STEMBot Pi Integration capstone project.
 
 The goal of this project is to create the tools needed to wirelessly transmit video to a computer from a Stembot 2 via an onboard Raspberry Pi.
 
